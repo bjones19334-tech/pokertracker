@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Poker Tracker</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    margin: 0;
+    background: #f4f6f8;
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* Sidebar styling */
+  .sidebar {
+    width: 140px;
+    background-color: #3498db;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding-top: 12px;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+  }
+  .sidebar button {
+    background: none;
+    border: none;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 15px 10px;
+    cursor: pointer;
+    text-align: left;
+    border-left: 4px solid transparent;
+    transition: background-color 0.3s, border-left-color 0.3s;
+    user-select:none;
+  }
+  .sidebar button:hover {
+    background-color: #2980b9;
+  }
+  .sidebar button.active {
+    border-left-color: #f1c40f;
+    background-color: #2c80b4;
+  }
+  /* Responsive: collapse sidebar on very small screens */
+  @media (max-width: 400px) {
+    .sidebar {
+      width: 100%;
+      height: auto;
+      flex-direction: row;
+      justify-content: space-around;
+      position: relative;
+    }
+    .sidebar button {
+      text-align: center;
+      padding: 10px 0;
+      font-size: 12px;
+      border-left: none;
+      border-bottom: 3px solid transparent;
+    }
+    .sidebar button.active {
+      border-left: none;
+      border-bottom: 3px solid #f1c40f;
+    }
+  }
+  /* Main content area */
+  .main-content {
+    margin-left: 140px;
+    padding: 16px 12px 80px;
+    flex-grow: 1;
+  }
+  @media (max-width: 400px) {
+    .main-content {
+      margin-left: 0;
+      margin-top: 8px;
+      padding-bottom: 120px;
+    }
+  }
+  h1 {
+    text-align: center;
+    margin: 12px 0 20px;
+    color: #222;
+  }
+  table {
+    width: 90%;
+    max-width: 580px;
+    margin: 0 auto 80px;
+    border-collapse: collapse;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 16px;
+    border-bottom: 1px solid #e1e5ea;
+  }
+  th {
+    background-color: #3498db;
+    color: white;
+    font-weight: 700;
+  }
+  tr:last-child td {
+    border-bottom: none;
+  }
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 16px;
+    border: 1px solid #cbd2d9;
+    border-radius: 6px;
+    text-align: center;
+    transition: border-color 0.3s ease;
+  }
+  input[type="text"]:focus, input[type="number"]:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 4px #3498db;
+  }
+  button.action-btn {
+    background-color: #3498db;
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 12px 24px;
+    margin: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    min-width: 140px;
+  }
+  button.action-btn:disabled {
+    background-color: #9bbbd4;
+    cursor: not-allowed;
+  }
+  button.action-btn:hover:not(:disabled) {
+    background-color: #2a7ac1;
+  }
+  #controls {
+    text-align: center;
+  }
+  #totalBalance {
+    position: fixed;
+    bottom: 0;
+    left: 140px;
+    right: 0;
+    background-color: #222;
+    color: white;
+    font-size: 19px;
+    font-weight: 700;
+    padding: 14px 12px;
+    text-align: center;
+    box-shadow: 0 -2px 14px rgba(0, 0, 0, 0.3);
+    user-select:none;
+  }
+  @media (max-width: 400px) {
+    #totalBalance {
+      left: 0;
+    }
+  }
+  .btn-cell {
+    width: 48px;
+  }
+  .delete-btn {
+    background-color: #e74c3c;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  .delete-btn:hover {
+    background-color: #c0392b;
+  }
+  #totalsTableContainer {
+    overflow-x: auto;
+    margin: 0 auto 20px;
+    max-width: 90%;
+  }
+  #totalsTable {
+    border-collapse: collapse;
+    border: 1px solid #ddd;
+    min-width: 300px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  #totalsTable th, #totalsTable td {
+    border: 1px solid #ddd;
+    padding: 12px 10px;
+    min-width: 80px;
+  }
+  #totalsTable th {
+    background: #3498db;
+    color: white;
+    font-weight: 700;
+  }
+  #totalsTable tr:hover {
+    background: #f1f6fc;
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar" role="navigation" aria-label="Main menu">
+  <button id="btnCurrentSession" class="active" aria-current="page" onclick="switchTab('current')">Current Session</button>
+  <button id="btnToBePaid" onclick="switchTab('paidout')">To be Paid Out</button>
+  <button id="btnLog" onclick="switchTab('log')">Log</button>
+  <button id="btnDashboard" onclick="switchTab('dashboard')">Dashboard</button>
+</div>
+
+<div class="main-content">
+
+  <h1>Poker Winnings Tracker</h1>
+
+  <section id="current-tab-content" role="region" aria-label="Current Session Tab">
+    <table id="trackerTable" border="0" aria-label="Poker Tracker Table">
+      <thead>
+        <tr>
+          <th>Player</th>
+          <th>Buy-in ($)</th>
+          <th>Cash-out ($)</th>
+          <th>Result ($)</th>
+          <th class="btn-cell" title="Remove Player"></th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div id="controls">
+      <button class="action-btn" onclick="addRow()">Add Player</button>
+      <button class="action-btn" id="confirmSessionBtn" onclick="confirmSession()" disabled>Confirm Session</button>
+    </div>
+  </section>
+
+  <section id="paidout-tab-content" style="display:none;" role="region" aria-label="To be Paid Out Tab">
+    <div id="totalsTableContainer">
+      <table id="totalsTable" aria-label="Running Totals">
+        <thead>
+          <tr id="totalsHeaderRow"></tr>
+        </thead>
+        <tbody>
+          <tr id="totalsRow"></tr>
+        </tbody>
+      </table>
+    </div>
+    <table id="sessionsPaidOutTable" border="1" aria-label="To Be Paid Out Sessions">
+      <thead>
+        <tr><th>Date / Time</th><th>Player</th><th>Result ($)</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div style="text-align:center; margin: 12px;">
+      <button class="action-btn" id="clearPaidOutBtn" onclick="clearPaidOut()">Clear To Be Paid Out (Confirm)</button>
+    </div>
+  </section>
+
+  <section id="log-tab-content" style="display:none;" role="region" aria-label="Log Tab">
+    <table id="logTable" border="1" aria-label="Log History">
+      <thead>
+        <tr><th>Date / Time</th><th>Player</th><th>Result ($)</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="dashboard-tab-content" style="display:none;" role="region" aria-label="Dashboard Tab">
+    <h2 style="text-align:center; margin-top: 8px;">Dashboard: Total Winnings / Losses</h2>
+    <table id="dashboardTable" border="1" aria-label="Dashboard Totals" style="margin-bottom: 80px; width: 90%; max-width: 500px; margin-left: auto; margin-right: auto;">
+      <thead><tr><th>Player</th><th>Total Winnings ($)</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+</div>
+
+<div id="totalBalance">Total balance: $0.00</div>
+
+<script>
+  const defaultPlayers = ["Ryan", "Jordan", "Nate", "Majeed", "Aryan", "Ameen"];
+  const tableBody = document.querySelector("#trackerTable tbody");
+  const confirmBtn = document.getElementById("confirmSessionBtn");
+  const totalBalanceDiv = document.getElementById("totalBalance");
+  const totalsHeaderRow = document.getElementById("totalsHeaderRow");
+  const totalsRow = document.getElementById("totalsRow");
+  const sessionsPaidOutTableBody = document.querySelector("#sessionsPaidOutTable tbody");
+  const logTableBody = document.querySelector("#logTable tbody");
+  const dashboardTableBody = document.querySelector("#dashboardTable tbody");
+  const sidebarButtons = {
+    current: document.getElementById("btnCurrentSession"),
+    paidout: document.getElementById("btnToBePaid"),
+    log: document.getElementById("btnLog"),
+    dashboard: document.getElementById("btnDashboard")
+  };
+
+  let sessions = [];
+  let toBePaidOut = [];
+  let logs = [];
+
+  function createPlayerRow(name = "", buyIn = 10, cashOut = 0) {
+    const row = document.createElement("tr");
+    const playerCell = document.createElement("td");
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.placeholder = "Player Name";
+    nameInput.value = name;
+    playerCell.appendChild(nameInput);
+    row.appendChild(playerCell);
+
+    const buyInCell = document.createElement("td");
+    const buyInInput = document.createElement("input");
+    buyInInput.type = "number";
+    buyInInput.min = 0;
+    buyInInput.step = 10;
+    buyInInput.value = buyIn;
+    buyInInput.style.textAlign = "center";
+    buyInInput.oninput = () => updateResult(row);
+    buyInCell.appendChild(buyInInput);
+    row.appendChild(buyInCell);
+
+    const cashOutCell = document.createElement("td");
+    const cashOutInput = document.createElement("input");
+    cashOutInput.type = "number";
+    cashOutInput.min = 0;
+    cashOutInput.step = 10;
+    cashOutInput.value = cashOut;
+    cashOutInput.style.textAlign = "center";
+    cashOutInput.oninput = () => updateResult(row);
+    cashOutCell.appendChild(cashOutInput);
+    row.appendChild(cashOutCell);
+
+    const resultCell = document.createElement("td");
+    resultCell.innerText = (cashOut - buyIn).toFixed(2);
+    row.appendChild(resultCell);
+
+    const btnCell = document.createElement("td");
+    btnCell.className = "btn-cell";
+    const delBtn = document.createElement("button");
+    delBtn.className = "delete-btn";
+    delBtn.type = "button";
+    delBtn.textContent = "X";
+    delBtn.title = "Remove Player";
+    delBtn.onclick = () => {
+      row.remove();
+      calculateRunningTotal();
+      checkConfirmEnabled();
+    };
+    btnCell.appendChild(delBtn);
+    row.appendChild(btnCell);
+
+    return row;
+  }
+
+  function loadDefaultPlayers() {
+    tableBody.innerHTML = "";
+    defaultPlayers.forEach((name) => {
+      const row = createPlayerRow(name, 10, 0);
+      tableBody.appendChild(row);
+    });
+    calculateRunningTotal();
+  }
+
+  function addRow() {
+    const row = createPlayerRow("", 10, 0);
+    tableBody.appendChild(row);
+    calculateRunningTotal();
+  }
+
+  function updateResult(row) {
+    const buyIn = parseFloat(row.cells[1].firstElementChild.value) || 0;
+    const cashOut = parseFloat(row.cells[2].firstElementChild.value) || 0;
+    row.cells[3].innerText = (cashOut - buyIn).toFixed(2);
+    calculateRunningTotal();
+  }
+
+  function calculateRunningTotal() {
+    let total = 0;
+    for (let row of tableBody.rows) {
+      total += parseFloat(row.cells[3].innerText) || 0;
+    }
+    totalBalanceDiv.innerText = `Total balance: $${total.toFixed(2)}`;
+    if (total === 0) {
+      totalBalanceDiv.style.backgroundColor = "#27ae60";
+      totalBalanceDiv.innerText += " (Everything balances out!)";
+    } else {
+      totalBalanceDiv.style.backgroundColor = "#c0392b";
+      totalBalanceDiv.innerText += " (Imbalance detected)";
+    }
+    checkConfirmEnabled();
+  }
+
+  function checkConfirmEnabled() {
+    let total = 0;
+    for (let row of tableBody.rows) {
+      total += parseFloat(row.cells[3].innerText) || 0;
+    }
+    confirmBtn.disabled = total !== 0;
+  }
+
+  function confirmSession() {
+    const sessionData = [];
+    for (let row of tableBody.rows) {
+      const name = row.cells[0].firstElementChild.value.trim();
+      if (!name) continue;
+      const buyIn = parseFloat(row.cells[1].firstElementChild.value) || 0;
+      const cashOut = parseFloat(row.cells[2].firstElementChild.value) || 0;
+      const result = cashOut - buyIn;
+      sessionData.push({ name, buyIn, cashOut, result });
+    }
+    if (sessionData.length === 0) {
+      alert("No player data to save.");
+      return;
+    }
+    const now = new Date();
+    const dateTimeStr = now.toLocaleString();
+
+    sessions.push({ dateTime: dateTimeStr, players: sessionData });
+    toBePaidOut.push({ dateTime: dateTimeStr, players: sessionData });
+
+    alert("Session saved successfully!");
+
+    loadDefaultPlayers();
+    updateTotalsAndSessions();
+
+    // Update Dashboard immediately after new session
+    renderDashboard();
+
+    switchTab("paidout");
+  }
+
+  function updateTotalsAndSessions() {
+    let totals = {};
+    defaultPlayers.forEach((p) => (totals[p] = 0));
+
+    toBePaidOut.forEach((session) => {
+      session.players.forEach((p) => {
+        if (!(p.name in totals)) totals[p.name] = 0;
+        totals[p.name] += p.result;
+      });
+    });
+
+    totalsHeaderRow.innerHTML = "";
+    let thDate = document.createElement("th");
+    thDate.textContent = "";
+    totalsHeaderRow.appendChild(thDate);
+    Object.keys(totals).forEach((name) => {
+      let th = document.createElement("th");
+      th.textContent = name;
+      th.setAttribute("scope", "col");
+      totalsHeaderRow.appendChild(th);
+    });
+
+    totalsRow.innerHTML = "";
+    let emptyCell = document.createElement("td");
+    emptyCell.textContent = "Total";
+    emptyCell.style.fontWeight = "700";
+    totalsRow.appendChild(emptyCell);
+    Object.values(totals).forEach((val) => {
+      let td = document.createElement("td");
+      td.textContent = val.toFixed(2);
+      td.style.fontWeight = "600";
+      td.style.color = val >= 0 ? "#27ae60" : "#c0392b";
+      totalsRow.appendChild(td);
+    });
+
+    sessionsPaidOutTableBody.innerHTML = "";
+    toBePaidOut.forEach((session) => {
+      session.players.forEach((p) => {
+        const row = document.createElement("tr");
+        const dateCell = document.createElement("td");
+        dateCell.textContent = session.dateTime;
+        dateCell.style.fontWeight = "600";
+        const nameCell = document.createElement("td");
+        nameCell.textContent = p.name;
+        const resultCell = document.createElement("td");
+        resultCell.textContent = p.result.toFixed(2);
+        resultCell.style.color = p.result >= 0 ? "#27ae60" : "#c0392b";
+
+        row.appendChild(dateCell);
+        row.appendChild(nameCell);
+        row.appendChild(resultCell);
+        sessionsPaidOutTableBody.appendChild(row);
+      });
+    });
+
+    let totalSum = Object.values(totals).reduce((a, b) => a + b, 0);
+    totalBalanceDiv.style.backgroundColor = totalSum === 0 ? "#27ae60" : "#c0392b";
+    totalBalanceDiv.textContent =
+      "Total balance: $" +
+      totalSum.toFixed(2) +
+      (totalSum === 0 ? " (Everything balances out!)" : " (Imbalance detected)");
+
+    checkConfirmEnabled();
+  }
+
+  function clearPaidOut() {
+    if (!confirm("Are you sure you want to clear the 'To be Paid Out' tab? This will move current data to Log.")) {
+      return;
+    }
+    if (toBePaidOut.length === 0) {
+      alert("To be Paid Out tab is already empty.");
+      return;
+    }
+    logs = logs.concat(toBePaidOut);
+    toBePaidOut = [];
+
+    totalsHeaderRow.innerHTML = "";
+    totalsRow.innerHTML = "";
+    sessionsPaidOutTableBody.innerHTML = "";
+
+    totalBalanceDiv.style.backgroundColor = "#27ae60";
+    totalBalanceDiv.textContent = "Total balance: $0.00 (Everything balances out!)";
+
+    renderLogTable();
+    renderDashboard();
+
+    switchTab("log");
+  }
+
+  function renderLogTable() {
+    logTableBody.innerHTML = "";
+    logs.forEach((session) => {
+      session.players.forEach((p) => {
+        const row = document.createElement("tr");
+
+        const dateCell = document.createElement("td");
+        dateCell.textContent = session.dateTime;
+        dateCell.style.fontWeight = "600";
+
+        const nameCell = document.createElement("td");
+        nameCell.textContent = p.name;
+
+        const resultCell = document.createElement("td");
+        resultCell.textContent = p.result.toFixed(2);
+        resultCell.style.color = p.result >= 0 ? "#27ae60" : "#c0392b";
+
+        row.appendChild(dateCell);
+        row.appendChild(nameCell);
+        row.appendChild(resultCell);
+
+        logTableBody.appendChild(row);
+      });
+    });
+  }
+
+  function renderDashboard() {
+    const logTotals = {};
+    defaultPlayers.forEach((p) => (logTotals[p] = 0));
+    logs.forEach((session) =>
+      session.players.forEach((p) => {
+        if (!(p.name in logTotals)) logTotals[p.name] = 0;
+        logTotals[p.name] += p.result;
+      })
+    );
+
+    const currentTotals = {};
+    defaultPlayers.forEach((p) => (currentTotals[p] = 0));
+    toBePaidOut.forEach((session) =>
+      session.players.forEach((p) => {
+        if (!(p.name in currentTotals)) currentTotals[p.name] = 0;
+        currentTotals[p.name] += p.result;
+      })
+    );
+
+    const combinedTotals = {};
+    const uniquePlayers = new Set([
+      ...Object.keys(logTotals),
+      ...Object.keys(currentTotals),
+    ]);
+    uniquePlayers.forEach((p) => {
+      combinedTotals[p] = (logTotals[p] || 0) + (currentTotals[p] || 0);
+    });
+
+    dashboardTableBody.innerHTML = "";
+
+    const sortedPlayers = Object.entries(combinedTotals).sort(([, a], [, b]) => b - a);
+
+    sortedPlayers.forEach(([name, total]) => {
+      const row = document.createElement("tr");
+      const nameCell = document.createElement("td");
+      nameCell.textContent = name;
+      nameCell.style.fontWeight = "600";
+      const totalCell = document.createElement("td");
+      totalCell.textContent = total.toFixed(2);
+      totalCell.style.color = total >= 0 ? "#27ae60" : "#c0392b";
+      row.appendChild(nameCell);
+      row.appendChild(totalCell);
+      dashboardTableBody.appendChild(row);
+    });
+  }
+
+  function switchTab(tab) {
+    const tabs = [
+      "current",
+      "paidout",
+      "log",
+      "dashboard"
+    ];
+    tabs.forEach(t => {
+      const content = document.getElementById(t + "-tab-content");
+      content.style.display = (t === tab) ? "" : "none";
+      sidebarButtons[t].classList.toggle("active", t === tab);
+    });
+  }
+
+  // Initialize
+  loadDefaultPlayers();
+  calculateRunningTotal();
+  checkConfirmEnabled();
+</script>
+
+</body>
+</html>
