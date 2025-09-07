@@ -1,229 +1,491 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Poker Tracker (Google Sheets backend)</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin:0; background: #f9fbfd;}
-    h1 { text-align:center; font-size:20px; margin:10px 0 8px;}
-    .tabs { display:flex; justify-content:space-around; background:#3498db; }
-    .tab { flex:1; text-align:center; font-size:13px; font-weight:600; color:#fff; padding:9px 2px; cursor:pointer; border-bottom: 3px solid transparent;}
-    .tab.active{ border-color:#f1c40f; background:#2381c9;}
-    .main-content { max-width:450px; margin:0 auto; padding:8px 2px 60px;}
-    table { width:100%; border-collapse:collapse; margin-bottom:8px; background:#fff; font-size:13px;}
-    th, td { padding:7px 5px; text-align:center; border-bottom:1px solid #e0e3e8;}
-    th { background:#3498db; color:#fff; font-weight:600;}
-    .btn-cell { width:30px;}
-    input[type="text"], input[type="number"] { width:90%; font-size:13px; padding:3px 2px;}
-    button.action-btn { background:#3498db; color:#fff; font-weight:700; border:none; border-radius:5px; padding:8px 14px;
-      margin:5px 3px; font-size:13px; min-width:89px;}
-    button.action-btn:disabled { background:#9bbbd4;}
-    .delete-btn { background:#e74c3c; color:#fff; border:none; border-radius:5px; padding:2px 7px; font-size:11px;}
-    .dashboard-table th, .dashboard-table td { font-size:12px;}
-    #totalBalance { background:#222; color:#fff; font-size:15px; font-weight:700; position:fixed; left:0; right:0;
-      bottom:0; text-align:center; padding:12px 4px; z-index:22;}
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mobile Friendly Poker Tracker</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    margin: 0;
+    background: #f4f6f8;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  h1 {
+    text-align: center;
+    margin: 12px 0 14px;
+    font-size: 20px;
+    color: #222;
+  }
+  /* Horizontal top navigation tabs */
+  .tabs {
+    display: flex;
+    justify-content: space-around;
+    background: #3498db;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  .tab {
+    flex-grow: 1;
+    text-align: center;
+    padding: 10px 6px;
+    cursor: pointer;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    border-bottom: 3px solid transparent;
+    user-select: none;
+    transition: background-color 0.3s ease, border-bottom-color 0.3s ease;
+  }
+  .tab:hover:not(.active) {
+    background-color: #2874a6;
+  }
+  .tab.active {
+    border-bottom-color: #f1c40f;
+    background-color: #2a80b4;
+  }
+  /* Main content area */
+  .main-content {
+    flex-grow: 1;
+    padding: 8px 4px 60px;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    background: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: 8px 6px;
+    font-size: 13px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+  }
+  th {
+    background-color: #3498db;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  tr:last-child td {
+    border-bottom: none;
+  }
+  input[type="text"], input[type="number"] {
+    width: 90%;
+    padding: 5px 6px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+  }
+  input[type="text"]:focus, input[type="number"]:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 5px #3498db;
+  }
+  button.action-btn {
+    background-color: #3498db;
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 10px 18px;
+    margin: 8px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    min-width: 100px;
+    user-select: none;
+  }
+  button.action-btn:disabled {
+    background-color: #9bbbd4;
+    cursor: not-allowed;
+  }
+  button.action-btn:hover:not(:disabled) {
+    background-color: #2a7ac1;
+  }
+  #controls {
+    text-align: center;
+  }
+  #totalBalance {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #222;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 12px 8px;
+    text-align: center;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.3);
+    user-select:none;
+    z-index: 1000;
+  }
+  .btn-cell {
+    width: 36px;
+  }
+  .delete-btn {
+    background-color: #e74c3c;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+  }
+  .delete-btn:hover {
+    background-color: #c0392b;
+  }
+  #totalsTableContainer {
+    overflow-x: auto;
+    margin: 0 auto 12px;
+  }
+  #totalsTable {
+    border-collapse: collapse;
+    border: 1px solid #ddd;
+    min-width: 300px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+    background: white;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  #totalsTable th, #totalsTable td {
+    border: 1px solid #ddd;
+    padding: 8px 6px;
+    min-width: 60px;
+    font-size: 12px;
+  }
+  #totalsTable th {
+    background: #3498db;
+    color: white;
+    font-weight: 600;
+  }
+  #totalsTable tr:hover {
+    background: #f1f6fc;
+  }
+  /* Responsive tweaks */
+  @media (max-width: 320px) {
+    h1 {
+      font-size: 18px;
+    }
+    .tab {
+      font-size: 12px;
+      padding: 8px 4px;
+    }
+    button.action-btn {
+      font-size: 13px;
+      padding: 8px 14px;
+      min-width: 90px;
+    }
+    input[type="text"], input[type="number"] {
+      width: 85%;
+      padding: 4px 5px;
+      font-size: 13px;
+    }
+    th, td {
+      font-size: 11px;
+      padding: 6px 4px;
+    }
+  }
+</style>
 </head>
 <body>
-<div class="tabs">
+<div class="tabs" role="navigation" aria-label="Main menu">
   <div class="tab active" id="tabCurrent" onclick="switchTab('current')">Current</div>
+  <div class="tab" id="tabPaidout" onclick="switchTab('paidout')">To be Paid Out</div>
   <div class="tab" id="tabLog" onclick="switchTab('log')">Log</div>
   <div class="tab" id="tabDashboard" onclick="switchTab('dashboard')">Dashboard</div>
 </div>
 <div class="main-content">
-  <h1>Poker Tracker</h1>
-  <section id="current-tab-content">
-    <table id="trackerTable">
+  <h1>Mobile Friendly Poker Tracker</h1>
+  <section id="current-tab-content" role="region" aria-label="Current Session">
+    <table id="trackerTable" aria-label="Poker Tracker Table">
       <thead>
-        <tr><th>Player</th><th>Buy-in</th><th>Cash-out</th><th>Result</th><th class="btn-cell"></th></tr>
+        <tr>
+          <th>Player</th>
+          <th>Buy-in ($)</th>
+          <th>Cash-out ($)</th>
+          <th>Result ($)</th>
+          <th class="btn-cell" title="Remove Player"></th>
+        </tr>
       </thead>
       <tbody></tbody>
     </table>
-    <div style="text-align:center;">
+    <div id="controls">
       <button class="action-btn" onclick="addRow()">Add Player</button>
       <button class="action-btn" id="confirmSessionBtn" onclick="confirmSession()" disabled>Confirm Session</button>
     </div>
   </section>
-  <section id="log-tab-content" style="display:none;">
-    <table id="logTable">
-      <thead><tr><th>Date/Time</th><th>Player</th><th>BuyIn</th><th>CashOut</th><th>Result</th></tr></thead>
+  <section id="paidout-tab-content" style="display:none;" role="region" aria-label="To be Paid Out">
+    <div id="totalsTableContainer">
+      <table id="totalsTable" aria-label="Running Totals">
+        <thead>
+          <tr id="totalsHeaderRow"></tr>
+        </thead>
+        <tbody>
+          <tr id="totalsRow"></tr>
+        </tbody>
+      </table>
+    </div>
+    <table id="sessionsPaidOutTable" border="1" aria-label="To Be Paid Out Sessions" style="margin-bottom: 12px;">
+      <thead>
+        <tr><th>Date / Time</th><th>Player</th><th>Result ($)</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div style="text-align:center; margin: 12px;">
+      <button class="action-btn" id="clearPaidOutBtn" onclick="clearPaidOut()">Clear To Be Paid Out (Confirm)</button>
+    </div>
+  </section>
+  <section id="log-tab-content" style="display:none;" role="region" aria-label="Log">
+    <table id="logTable" border="1" aria-label="Log History">
+      <thead>
+        <tr><th>Date / Time</th><th>Player</th><th>Result ($)</th></tr>
+      </thead>
       <tbody></tbody>
     </table>
   </section>
-  <section id="dashboard-tab-content" style="display:none;">
-    <h2 style="text-align:center;font-size:15px;">Totals</h2>
-    <table id="dashboardTable" class="dashboard-table">
-      <thead><tr><th>Player</th><th>Total Winnings</th></tr></thead>
+  <section id="dashboard-tab-content" style="display:none;" role="region" aria-label="Dashboard">
+    <h2 style="text-align:center; margin-top: 8px; font-size: 18px;">Dashboard: Total Winnings / Losses</h2>
+    <table id="dashboardTable" border="1" aria-label="Dashboard Totals" style="margin-bottom: 80px; width: 100%; max-width: 440px; margin-left: auto; margin-right: auto;">
+      <thead><tr><th>Player</th><th>Total Winnings ($)</th></tr></thead>
       <tbody></tbody>
     </table>
   </section>
 </div>
 <div id="totalBalance">Total balance: $0.00</div>
-
 <script>
-const SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbySyawcnKf2J31yCAU3kPgxStP3iNdoyHFs6RYjT6HENt1OnO96J5adnPwJzTfIZ5-f/exec";
-const defaultPlayers = ["Ryan", "Jordan", "Nate", "Majeed", "Aryan", "Ameen"];
-const tableBody = document.querySelector("#trackerTable tbody");
-const confirmBtn = document.getElementById("confirmSessionBtn");
-const totalBalanceDiv = document.getElementById("totalBalance");
-const logTableBody = document.querySelector("#logTable tbody");
-const dashboardTableBody = document.querySelector("#dashboardTable tbody");
-const tabBtns = {
-  current: document.getElementById("tabCurrent"),
-  log: document.getElementById("tabLog"),
-  dashboard: document.getElementById("tabDashboard"),
-};
-const tabSections = {
-  current: document.getElementById("current-tab-content"),
-  log: document.getElementById("log-tab-content"),
-  dashboard: document.getElementById("dashboard-tab-content"),
-};
+  const SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxitlNlWfvq_IMHjl60417TaUITJoVZMUwho7XvHaat4fo0ksXUx7O9DFOQNJdYa4y4OQ/exec";
 
-function createPlayerRow(name = "", buyIn = 10, cashOut = 0) {
-  const row = document.createElement("tr");
-  // Player name
-  const playerCell = document.createElement("td");
-  const nameInput = document.createElement("input");
-  nameInput.type = "text"; nameInput.placeholder = "Name"; nameInput.value = name;
-  playerCell.appendChild(nameInput); row.appendChild(playerCell);
-  // Buy-in
-  const buyInCell = document.createElement("td");
-  const buyInInput = document.createElement("input");
-  buyInInput.type = "number"; buyInInput.min = 0; buyInInput.step = 10; buyInInput.value = buyIn;
-  buyInInput.oninput = () => updateResult(row);
-  buyInCell.appendChild(buyInInput); row.appendChild(buyInCell);
-  // Cash-out
-  const cashOutCell = document.createElement("td");
-  const cashOutInput = document.createElement("input");
-  cashOutInput.type = "number"; cashOutInput.min = 0; cashOutInput.step = 10; cashOutInput.value = cashOut;
-  cashOutInput.oninput = () => updateResult(row);
-  cashOutCell.appendChild(cashOutInput); row.appendChild(cashOutCell);
-  // Result (auto)
-  const resultCell = document.createElement("td");
-  resultCell.innerText = (cashOut - buyIn).toFixed(2);
-  row.appendChild(resultCell);
-  // Delete button
-  const btnCell = document.createElement("td"); btnCell.className = "btn-cell";
-  const delBtn = document.createElement("button");
-  delBtn.className = "delete-btn"; delBtn.textContent = "X";
-  delBtn.onclick = () => { row.remove(); updateConfirmState(); };
-  btnCell.appendChild(delBtn); row.appendChild(btnCell);
-  return row;
-}
-function loadDefaultPlayers() {
-  tableBody.innerHTML = "";
-  defaultPlayers.forEach(name => tableBody.appendChild(createPlayerRow(name,10,0)));
-  updateConfirmState();
-}
-// Calculate and update total balance bar + enable/disable confirm
-function updateConfirmState() {
-  let total = 0;
-  for (let row of tableBody.rows)
-    total += parseFloat(row.cells[3].innerText) || 0;
-  totalBalanceDiv.innerText = `Total balance: $${total.toFixed(2)}` + (total===0?" (Everything balances out!)":" (Imbalance detected)");
-  totalBalanceDiv.style.background = total===0 ? "#27ae60" : "#c0392b";
-  confirmBtn.disabled = total !== 0;
-}
-function addRow() {
-  tableBody.appendChild(createPlayerRow("",10,0));
-  updateConfirmState();
-}
-function updateResult(row) {
-  const buyIn = parseFloat(row.cells[1].firstElementChild.value) || 0;
-  const cashOut = parseFloat(row.cells[2].firstElementChild.value) || 0;
-  row.cells[3].innerText = (cashOut - buyIn).toFixed(2);
-  updateConfirmState();
-}
-// ---- Google Sheets Integration
-async function loadSessionsFromSheet() {
-  try {
-    const response = await fetch(SHEET_WEBAPP_URL);
-    const data = await response.json();
-    let rows = data;
-    if (rows.length && rows[0][0] === "Date") rows = rows.slice(1);
-    renderLog(rows);
-    renderDashboard(rows);
-  } catch(e) { console.error(e);}
-}
-async function sendSessionsToSheet(sessionRows) {
-  for (const row of sessionRows) {
-    const record = {
-      date: row[0],
-      player: row[1],
-      buyin: row[2],
-      cashout: row[3],
-      result: row[4]
+  const defaultPlayers = ["Ryan", "Jordan", "Nate", "Majeed", "Aryan", "Ameen"];
+  const tableBody = document.querySelector("#trackerTable tbody");
+  const confirmBtn = document.getElementById("confirmSessionBtn");
+  const totalBalanceDiv = document.getElementById("totalBalance");
+  const totalsHeaderRow = document.getElementById("totalsHeaderRow");
+  const totalsRow = document.getElementById("totalsRow");
+  const sessionsPaidOutTableBody = document.querySelector("#sessionsPaidOutTable tbody");
+  const logTableBody = document.querySelector("#logTable tbody");
+  const dashboardTableBody = document.querySelector("#dashboardTable tbody");
+  const tabs = {
+    current: document.getElementById("current-tab-content"),
+    paidout: document.getElementById("paidout-tab-content"),
+    log: document.getElementById("log-tab-content"),
+    dashboard: document.getElementById("dashboard-tab-content"),
+  };
+  const tabButtons = {
+    current: document.getElementById("tabCurrent"),
+    paidout: document.getElementById("tabPaidout"),
+    log: document.getElementById("tabLog"),
+    dashboard: document.getElementById("tabDashboard"),
+  };
+  let sessions = [];
+  let toBePaidOut = [];
+  let logs = [];
+  
+  function createPlayerRow(name = "", buyIn = 10, cashOut = 0) {
+    const row = document.createElement("tr");
+    const playerCell = document.createElement("td");
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.placeholder = "Player Name";
+    nameInput.value = name;
+    playerCell.appendChild(nameInput);
+    row.appendChild(playerCell);
+    const buyInCell = document.createElement("td");
+    const buyInInput = document.createElement("input");
+    buyInInput.type = "number";
+    buyInInput.min = 0;
+    buyInInput.step = 10;
+    buyInInput.value = buyIn;
+    buyInInput.style.textAlign = "center";
+    buyInInput.oninput = () => updateResult(row);
+    buyInCell.appendChild(buyInInput);
+    row.appendChild(buyInCell);
+    const cashOutCell = document.createElement("td");
+    const cashOutInput = document.createElement("input");
+    cashOutInput.type = "number";
+    cashOutInput.min = 0;
+    cashOutInput.step = 10;
+    cashOutInput.value = cashOut;
+    cashOutInput.style.textAlign = "center";
+    cashOutInput.oninput = () => updateResult(row);
+    cashOutCell.appendChild(cashOutInput);
+    row.appendChild(cashOutCell);
+    const resultCell = document.createElement("td");
+    resultCell.innerText = (cashOut - buyIn).toFixed(2);
+    row.appendChild(resultCell);
+    const btnCell = document.createElement("td");
+    btnCell.className = "btn-cell";
+    const delBtn = document.createElement("button");
+    delBtn.className = "delete-btn";
+    delBtn.type = "button";
+    delBtn.textContent = "X";
+    delBtn.title = "Remove Player";
+    delBtn.onclick = () => {
+      row.remove();
+      calculateRunningTotal();
+      checkConfirmEnabled();
     };
-    await fetch(SHEET_WEBAPP_URL, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify(record)
-    });
+    btnCell.appendChild(delBtn);
+    row.appendChild(btnCell);
+    return row;
   }
-}
-// Display log
-function renderLog(rows) {
-  logTableBody.innerHTML = "";
-  rows.forEach(row => {
-    const tr = document.createElement("tr");
-    row.forEach(cell => {
-      const td = document.createElement("td");
-      td.textContent = cell;
-      tr.appendChild(td);
+
+  function loadDefaultPlayers() {
+    tableBody.innerHTML = "";
+    defaultPlayers.forEach((name) => {
+      const row = createPlayerRow(name, 10, 0);
+      tableBody.appendChild(row);
     });
-    logTableBody.appendChild(tr);
-  });
-}
-// Dashboard: player totals
-function renderDashboard(rows) {
-  const totals = {};
-  rows.forEach(r=>{
-    const name=r[1]; const winnings=+r[4];
-    if(!name) return;
-    if(!(name in totals)) totals[name]=0;
-    totals[name]+=winnings;
-  });
-  dashboardTableBody.innerHTML="";
-  Object.entries(totals).sort((a,b)=>b[1]-a[1]).forEach(([name, total])=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML = `<td>${name}</td><td style="color:${total>=0?'#27ae60':'#c0392b'}">${total.toFixed(2)}</td>`;
-    dashboardTableBody.appendChild(tr);
-  });
-}
-// Save session (all players) to Google Sheet, reload on success
-async function confirmSession() {
-  const now = new Date().toLocaleString();
-  const newRows = [];
-  for (let row of tableBody.rows) {
-    const name = row.cells[0].firstElementChild.value.trim();
-    if (!name) continue;
+    calculateRunningTotal();
+  }
+
+  function addRow() {
+    const row = createPlayerRow("", 10, 0);
+    tableBody.appendChild(row);
+    calculateRunningTotal();
+  }
+
+  function updateResult(row) {
     const buyIn = parseFloat(row.cells[1].firstElementChild.value) || 0;
     const cashOut = parseFloat(row.cells[2].firstElementChild.value) || 0;
-    const result = cashOut - buyIn;
-    newRows.push([now, name, buyIn, cashOut, result]);
+    row.cells[3].innerText = (cashOut - buyIn).toFixed(2);
+    calculateRunningTotal();
   }
-  if(newRows.length) {
-    await sendSessionsToSheet(newRows);
-    alert("Session saved!");
-    loadDefaultPlayers();
-    loadSessionsFromSheet(); // Refresh log & dashboard
-    switchTab('log');
+
+  function calculateRunningTotal() {
+    let total = 0;
+    for (let row of tableBody.rows) {
+      total += parseFloat(row.cells[3].innerText) || 0;
+    }
+    totalBalanceDiv.innerText = `Total balance: $${total.toFixed(2)}`;
+    if (total === 0) {
+      totalBalanceDiv.style.backgroundColor = "#27ae60";
+      totalBalanceDiv.innerText += " (Everything balances out!)";
+    } else {
+      totalBalanceDiv.style.backgroundColor = "#c0392b";
+      totalBalanceDiv.innerText += " (Imbalance detected)";
+    }
+    checkConfirmEnabled();
   }
-}
-// Tab switching
-function switchTab(tab) {
-  Object.keys(tabBtns).forEach(key=>{
-    tabBtns[key].classList.toggle('active', key===tab);
-    tabSections[key].style.display = key===tab ? '' : 'none';
-  });
-  if(tab!='current') loadSessionsFromSheet();
-}
-// INIT
-loadDefaultPlayers();
-document.addEventListener('DOMContentLoaded', function() {
-  loadSessionsFromSheet();
-});
+
+  function checkConfirmEnabled() {
+    let total = 0;
+    for (let row of tableBody.rows) {
+      total += parseFloat(row.cells[3].innerText) || 0;
+    }
+    confirmBtn.disabled = total !== 0;
+  }
+  
+  // Google Sheets Integration
+  
+  async function loadSessionsFromSheet() {
+    try {
+      const response = await fetch(SHEET_WEBAPP_URL);
+      const data = await response.json();
+      let rows = data;
+      if (rows.length && rows[0][0] === "Date") rows = rows.slice(1);
+      updateLogTable(rows);
+      updateDashboard(rows);
+    } catch (err) {
+      console.error("Failed to load sessions:", err);
+    }
+  }
+  
+  async function saveSessionsToSheet(sessionRows) {
+    for (const row of sessionRows) {
+      const record = {
+        date: row[0],
+        player: row[1],
+        buyin: row[2],
+        cashout: row[3],
+        result: row[4]
+      };
+      await fetch(SHEET_WEBAPP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(record),
+      });
+    }
+  }
+  
+  function updateLogTable(rows) {
+    logTableBody.innerHTML = "";
+    rows.forEach(row => {
+      const tr = document.createElement("tr");
+      row.forEach(cell => {
+        const td = document.createElement("td");
+        td.textContent = cell;
+        tr.appendChild(td);
+      });
+      logTableBody.appendChild(tr);
+    });
+  }
+
+  function updateDashboard(rows) {
+    const totals = {};
+    rows.forEach(row => {
+      const player = row[1];
+      const result = parseFloat(row[4]) || 0;
+      if (!totals[player]) totals[player] = 0;
+      totals[player] += result;
+    });
+    dashboardTableBody.innerHTML = "";
+    Object.entries(totals)
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([player, total]) => {
+        const tr = document.createElement("tr");
+        const playerCell = document.createElement("td");
+        playerCell.textContent = player;
+        const totalCell = document.createElement("td");
+        totalCell.textContent = total.toFixed(2);
+        totalCell.style.color = total >= 0 ? "#27ae60" : "#c0392b";
+        tr.appendChild(playerCell);
+        tr.appendChild(totalCell);
+        dashboardTableBody.appendChild(tr);
+      });
+  }
+  
+  async function confirmSession() {
+    const now = new Date().toLocaleString();
+    const newRows = [];
+    for (let row of tableBody.rows) {
+      const name = row.cells[0].firstElementChild.value.trim();
+      if (!name) continue;
+      const buyIn = parseFloat(row.cells[1].firstElementChild.value) || 0;
+      const cashOut = parseFloat(row.cells[2].firstElementChild.value) || 0;
+      const result = cashOut - buyIn;
+      newRows.push([now, name, buyIn, cashOut, result]);
+    }
+    if (newRows.length) {
+      await saveSessionsToSheet(newRows);
+      alert("Session saved!");
+      loadDefaultPlayers();
+      loadSessionsFromSheet();
+      switchTab("paidout");
+    }
+  }
+  
+  function switchTab(tab) {
+    Object.keys(tabs).forEach(key => {
+      tabs[key].style.display = (key === tab) ? "" : "none";
+      tabButtons[key].classList.toggle("active", key === tab);
+    });
+    if (tab !== "current") loadSessionsFromSheet();
+  }
+  
+  // Initialize on page load
+  loadDefaultPlayers();
+  calculateRunningTotal();
+  checkConfirmEnabled();
+  document.addEventListener('DOMContentLoaded', loadSessionsFromSheet);
 </script>
 </body>
 </html>
