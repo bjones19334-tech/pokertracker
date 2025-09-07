@@ -5,87 +5,115 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Poker Tracker</title>
 <style>
-  * { box-sizing: border-box; }
+  * {box-sizing: border-box;}
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
       Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
     margin: 0;
     background: #f4f6f8;
+    display: flex;
     min-height: 100vh;
     overflow-x: hidden;
-    font-size: 13px;
   }
-  /* Top horizontal navigation bar */
-  .topnav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    display: flex;
+  .sidebar {
+    width: 140px;
     background-color: #3498db;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding-top: 12px;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
   }
-  .topnav button {
-    flex: 1;
-    padding: 10px 0;
-    font-size: 13px;
-    font-weight: 600;
-    color: white;
+  .sidebar button {
     background: none;
     border: none;
-    border-bottom: 3px solid transparent;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 15px 10px;
     cursor: pointer;
-    user-select: none;
-    transition: background-color 0.3s, border-bottom-color 0.3s;
+    text-align: left;
+    border-left: 4px solid transparent;
+    transition: background-color 0.3s, border-left-color 0.3s;
+    user-select:none;
   }
-  .topnav button:hover:not(.active) {
-    background-color: #2874a6;
+  .sidebar button:hover {background-color: #2980b9;}
+  .sidebar button.active {
+    border-left-color: #f1c40f;
+    background-color: #2c80b4;
   }
-  .topnav button.active {
-    border-bottom-color: #f1c40f;
-    background-color: #2a80b4;
+  @media (max-width: 400px) {
+    .sidebar {
+      width: 100%;
+      height: auto;
+      flex-direction: row;
+      justify-content: space-around;
+      position: relative;
+    }
+    .sidebar button {
+      text-align: center;
+      padding: 10px 0;
+      font-size: 12px;
+      border-left: none;
+      border-bottom: 3px solid transparent;
+    }
+    .sidebar button.active {
+      border-left: none;
+      border-bottom: 3px solid #f1c40f;
+    }
   }
   .main-content {
-    padding: 48px 8px 80px;
-    max-width: 480px;
-    margin: 0 auto;
+    margin-left: 140px;
+    padding: 16px 12px 80px;
+    flex-grow: 1;
+  }
+  @media (max-width: 400px) {
+    .main-content {
+      margin-left: 0;
+      margin-top: 8px;
+      padding-bottom: 120px;
+    }
   }
   h1 {
     text-align: center;
     margin: 12px 0 20px;
-    font-size: 18px;
     color: #222;
   }
   table {
-    width: 100%;
+    width: 90%;
+    max-width: 580px;
+    margin: 0 auto 80px;
     border-collapse: collapse;
-    background: white;
-    border-radius: 6px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    background: #fff;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    font-size: 12px;
-    margin-bottom: 60px;
   }
   th, td {
-    padding: 6px 5px;
+    padding: 12px 8px;
     text-align: center;
-    border-bottom: 1px solid #ddd;
+    font-size: 16px;
+    border-bottom: 1px solid #e1e5ea;
   }
   th {
     background-color: #3498db;
     color: white;
-    font-weight: 600;
-    font-size: 13px;
+    font-weight: 700;
   }
   tr:last-child td {
     border-bottom: none;
   }
   input[type="text"], input[type="number"] {
-    width: 90%;
-    padding: 5px 6px;
-    font-size: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 16px;
+    border: 1px solid #cbd2d9;
+    border-radius: 6px;
     text-align: center;
+    transition: border-color 0.3s ease;
   }
   input[type="text"]:focus, input[type="number"]:focus {
     outline: none;
@@ -97,13 +125,12 @@
     border: none;
     color: white;
     font-weight: 700;
-    padding: 8px 14px;
-    margin: 6px 4px;
-    border-radius: 6px;
+    padding: 12px 24px;
+    margin: 8px 12px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 13px;
-    min-width: 90px;
-    user-select: none;
+    font-size: 16px;
+    min-width: 140px;
   }
   button.action-btn:disabled {
     background-color: #9bbbd4;
@@ -117,52 +144,58 @@
   }
   #totalBalance {
     position: fixed;
-    bottom: 0; left: 0; right: 0;
+    bottom: 0;
+    left: 140px;
+    right: 0;
     background-color: #222;
     color: white;
-    font-size: 14px;
+    font-size: 19px;
     font-weight: 700;
-    padding: 8px 8px;
+    padding: 14px 12px;
     text-align: center;
-    box-shadow: 0 -2px 12px rgba(0,0,0,0.3);
-    user-select: none;
-    z-index: 1001;
+    box-shadow: 0 -2px 14px rgba(0, 0, 0, 0.3);
+    user-select:none;
+  }
+  @media (max-width: 400px) {
+    #totalBalance {
+      left: 0;
+    }
   }
   .btn-cell {
-    width: 30px;
+    width: 48px;
   }
   .delete-btn {
     background-color: #e74c3c;
-    padding: 3px 7px;
-    border-radius: 5px;
-    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 14px;
   }
   .delete-btn:hover {
     background-color: #c0392b;
   }
   #totalsTableContainer {
     overflow-x: auto;
-    margin: 0 auto 12px;
+    margin: 0 auto 20px;
+    max-width: 90%;
   }
   #totalsTable {
     border-collapse: collapse;
     border: 1px solid #ddd;
-    min-width: 250px;
+    min-width: 300px;
     box-shadow: 0 1px 6px rgba(0,0,0,0.1);
     background: white;
-    border-radius: 6px;
+    border-radius: 8px;
     overflow: hidden;
   }
   #totalsTable th, #totalsTable td {
     border: 1px solid #ddd;
-    padding: 6px 5px;
-    min-width: 50px;
-    font-size: 11px;
+    padding: 12px 10px;
+    min-width: 80px;
   }
   #totalsTable th {
     background: #3498db;
     color: white;
-    font-weight: 600;
+    font-weight: 700;
   }
   #totalsTable tr:hover {
     background: #f1f6fc;
@@ -170,11 +203,11 @@
 </style>
 </head>
 <body>
-<div class="topnav" role="navigation" aria-label="Main menu">
-  <button class="active" id="btnCurrentSession">Current Session</button>
-  <button id="btnToBePaid">To be Paid Out</button>
-  <button id="btnLog">Log</button>
-  <button id="btnDashboard">Dashboard</button>
+<div class="sidebar" role="navigation" aria-label="Main menu">
+  <button id="btnCurrentSession" class="active" aria-current="page" onclick="switchTab('current')">Current Session</button>
+  <button id="btnToBePaid" onclick="switchTab('paidout')">To be Paid Out</button>
+  <button id="btnLog" onclick="switchTab('log')">Log</button>
+  <button id="btnDashboard" onclick="switchTab('dashboard')">Dashboard</button>
 </div>
 <div class="main-content">
   <h1>Poker Winnings Tracker</h1>
@@ -192,8 +225,8 @@
       <tbody></tbody>
     </table>
     <div id="controls">
-      <button class="action-btn" id="btnAddPlayer" type="button">Add Player</button>
-      <button class="action-btn" id="confirmSessionBtn" type="button" disabled>Confirm Session</button>
+      <button class="action-btn" onclick="addRow()">Add Player</button>
+      <button class="action-btn" id="confirmSessionBtn" onclick="confirmSession()" disabled>Confirm Session</button>
     </div>
   </section>
   <section id="paidout-tab-content" style="display:none;" role="region" aria-label="To be Paid Out Tab">
@@ -214,7 +247,7 @@
       <tbody></tbody>
     </table>
     <div style="text-align:center; margin: 12px;">
-      <button class="action-btn" id="clearPaidOutBtn" type="button">Clear To Be Paid Out (Confirm)</button>
+      <button class="action-btn" id="clearPaidOutBtn" onclick="clearPaidOut()">Clear To Be Paid Out (Confirm)</button>
     </div>
   </section>
   <section id="log-tab-content" style="display:none;" role="region" aria-label="Log Tab">
@@ -234,29 +267,27 @@
   </section>
 </div>
 <div id="totalBalance">Total balance: $0.00</div>
-
 <script>
+  const SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxitlNlWfvq_IMHjl60417TaUITJoVZMUwho7XvHaat4fo0ksXUx7O9DFOQNJdYa4y4OQ/exec";
+
   const defaultPlayers = ["Ryan", "Jordan", "Nate", "Majeed", "Aryan", "Ameen"];
   const tableBody = document.querySelector("#trackerTable tbody");
   const confirmBtn = document.getElementById("confirmSessionBtn");
-  const addPlayerBtn = document.getElementById("btnAddPlayer");
   const totalBalanceDiv = document.getElementById("totalBalance");
   const totalsHeaderRow = document.getElementById("totalsHeaderRow");
   const totalsRow = document.getElementById("totalsRow");
   const sessionsPaidOutTableBody = document.querySelector("#sessionsPaidOutTable tbody");
   const logTableBody = document.querySelector("#logTable tbody");
   const dashboardTableBody = document.querySelector("#dashboardTable tbody");
-  const tabButtons = {
+  const sidebarButtons = {
     current: document.getElementById("btnCurrentSession"),
     paidout: document.getElementById("btnToBePaid"),
     log: document.getElementById("btnLog"),
-    dashboard: document.getElementById("btnDashboard"),
+    dashboard: document.getElementById("btnDashboard")
   };
-
   let sessions = [];
   let toBePaidOut = [];
   let logs = [];
-
   function createPlayerRow(name = "", buyIn = 10, cashOut = 0) {
     const row = document.createElement("tr");
     const playerCell = document.createElement("td");
@@ -266,7 +297,6 @@
     nameInput.value = name;
     playerCell.appendChild(nameInput);
     row.appendChild(playerCell);
-
     const buyInCell = document.createElement("td");
     const buyInInput = document.createElement("input");
     buyInInput.type = "number";
@@ -277,7 +307,6 @@
     buyInInput.oninput = () => updateResult(row);
     buyInCell.appendChild(buyInInput);
     row.appendChild(buyInCell);
-
     const cashOutCell = document.createElement("td");
     const cashOutInput = document.createElement("input");
     cashOutInput.type = "number";
@@ -288,11 +317,9 @@
     cashOutInput.oninput = () => updateResult(row);
     cashOutCell.appendChild(cashOutInput);
     row.appendChild(cashOutCell);
-
     const resultCell = document.createElement("td");
     resultCell.innerText = (cashOut - buyIn).toFixed(2);
     row.appendChild(resultCell);
-
     const btnCell = document.createElement("td");
     btnCell.className = "btn-cell";
     const delBtn = document.createElement("button");
@@ -309,7 +336,6 @@
     row.appendChild(btnCell);
     return row;
   }
-
   function loadDefaultPlayers() {
     tableBody.innerHTML = "";
     defaultPlayers.forEach((name) => {
@@ -318,20 +344,17 @@
     });
     calculateRunningTotal();
   }
-
   function addRow() {
     const row = createPlayerRow("", 10, 0);
     tableBody.appendChild(row);
     calculateRunningTotal();
   }
-
   function updateResult(row) {
     const buyIn = parseFloat(row.cells[1].firstElementChild.value) || 0;
     const cashOut = parseFloat(row.cells[2].firstElementChild.value) || 0;
     row.cells[3].innerText = (cashOut - buyIn).toFixed(2);
     calculateRunningTotal();
   }
-
   function calculateRunningTotal() {
     let total = 0;
     for (let row of tableBody.rows) {
@@ -347,7 +370,6 @@
     }
     checkConfirmEnabled();
   }
-
   function checkConfirmEnabled() {
     let total = 0;
     for (let row of tableBody.rows) {
@@ -355,7 +377,8 @@
     }
     confirmBtn.disabled = total !== 0;
   }
-
+  
+  // New function to render To Be Paid Out tab data
   function renderPaidOut() {
     sessionsPaidOutTableBody.innerHTML = "";
     toBePaidOut.forEach((session) => {
@@ -399,10 +422,9 @@
     loadDefaultPlayers();
     updateTotalsAndSessions();
     renderDashboard();
-    renderPaidOut();
+    renderPaidOut(); // updated here to show the new data
     switchTab("paidout");
   }
-
   function updateTotalsAndSessions() {
     let totals = {};
     defaultPlayers.forEach((p) => (totals[p] = 0));
@@ -460,7 +482,6 @@
       (totalSum === 0 ? " (Everything balances out!)" : " (Imbalance detected)");
     checkConfirmEnabled();
   }
-
   function clearPaidOut() {
     if (!confirm("Are you sure you want to clear the 'To be Paid Out' tab? This will move current data to Log.")) {
       return;
@@ -480,7 +501,6 @@
     renderDashboard();
     switchTab("log");
   }
-
   function renderLogTable() {
     logTableBody.innerHTML = "";
     logs.forEach((session) => {
@@ -501,7 +521,6 @@
       });
     });
   }
-
   function renderDashboard() {
     const logTotals = {};
     defaultPlayers.forEach((p) => (logTotals[p] = 0));
@@ -542,7 +561,6 @@
       dashboardTableBody.appendChild(row);
     });
   }
-
   function switchTab(tab) {
     const tabs = [
       "current",
@@ -556,7 +574,7 @@
       sidebarButtons[t].classList.toggle("active", t === tab);
     });
   }
-  // Initialize on page load
+  // Initialize
   loadDefaultPlayers();
   calculateRunningTotal();
   checkConfirmEnabled();
