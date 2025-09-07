@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mobile Friendly Poker Tracker</title>
+<title>Poker Tracker</title>
 <style>
   * {
     box-sizing: border-box;
@@ -14,97 +14,130 @@
     margin: 0;
     background: #f4f6f8;
     display: flex;
-    flex-direction: column;
     min-height: 100vh;
+    overflow-x: hidden;
   }
-  h1 {
-    text-align: center;
-    margin: 12px 0 14px;
-    font-size: 20px;
-    color: #222;
-  }
-  /* Horizontal top navigation tabs */
-  .tabs {
+  /* Sidebar styling */
+  .sidebar {
+    width: 140px;
+    background-color: #3498db;
     display: flex;
-    justify-content: space-around;
-    background: #3498db;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    flex-direction: column;
+    align-items: stretch;
+    padding-top: 12px;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
   }
-  .tab {
-    flex-grow: 1;
-    text-align: center;
-    padding: 10px 6px;
-    cursor: pointer;
+  .sidebar button {
+    background: none;
+    border: none;
     color: white;
     font-weight: 600;
     font-size: 14px;
-    border-bottom: 3px solid transparent;
-    user-select: none;
-    transition: background-color 0.3s ease, border-bottom-color 0.3s ease;
+    padding: 15px 10px;
+    cursor: pointer;
+    text-align: left;
+    border-left: 4px solid transparent;
+    transition: background-color 0.3s, border-left-color 0.3s;
+    user-select:none;
   }
-  .tab:hover:not(.active) {
-    background-color: #2874a6;
+  .sidebar button:hover {
+    background-color: #2980b9;
   }
-  .tab.active {
-    border-bottom-color: #f1c40f;
-    background-color: #2a80b4;
+  .sidebar button.active {
+    border-left-color: #f1c40f;
+    background-color: #2c80b4;
+  }
+  /* Responsive: collapse sidebar on very small screens */
+  @media (max-width: 400px) {
+    .sidebar {
+      width: 100%;
+      height: auto;
+      flex-direction: row;
+      justify-content: space-around;
+      position: relative;
+    }
+    .sidebar button {
+      text-align: center;
+      padding: 10px 0;
+      font-size: 12px;
+      border-left: none;
+      border-bottom: 3px solid transparent;
+    }
+    .sidebar button.active {
+      border-left: none;
+      border-bottom: 3px solid #f1c40f;
+    }
   }
   /* Main content area */
   .main-content {
+    margin-left: 140px;
+    padding: 16px 12px 80px;
     flex-grow: 1;
-    padding: 8px 4px 60px;
-    width: 100%;
-    max-width: 480px;
-    margin: 0 auto;
+  }
+  @media (max-width: 400px) {
+    .main-content {
+      margin-left: 0;
+      margin-top: 8px;
+      padding-bottom: 120px;
+    }
+  }
+  h1 {
+    text-align: center;
+    margin: 12px 0 20px;
+    color: #222;
   }
   table {
-    width: 100%;
+    width: 90%;
+    max-width: 580px;
+    margin: 0 auto 80px;
     border-collapse: collapse;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
     background: #fff;
-    border-radius: 6px;
+    border-radius: 8px;
     overflow: hidden;
   }
   th, td {
-    padding: 8px 6px;
-    font-size: 13px;
+    padding: 12px 8px;
     text-align: center;
-    border-bottom: 1px solid #ddd;
+    font-size: 16px;
+    border-bottom: 1px solid #e1e5ea;
   }
   th {
     background-color: #3498db;
     color: white;
-    font-weight: 600;
-    font-size: 14px;
+    font-weight: 700;
   }
   tr:last-child td {
     border-bottom: none;
   }
   input[type="text"], input[type="number"] {
-    width: 90%;
-    padding: 5px 6px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 16px;
+    border: 1px solid #cbd2d9;
+    border-radius: 6px;
     text-align: center;
+    transition: border-color 0.3s ease;
   }
   input[type="text"]:focus, input[type="number"]:focus {
     outline: none;
     border-color: #3498db;
-    box-shadow: 0 0 5px #3498db;
+    box-shadow: 0 0 4px #3498db;
   }
   button.action-btn {
     background-color: #3498db;
     border: none;
     color: white;
     font-weight: 700;
-    padding: 10px 18px;
-    margin: 8px 6px;
-    border-radius: 6px;
+    padding: 12px 24px;
+    margin: 8px 12px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 14px;
-    min-width: 100px;
-    user-select: none;
+    font-size: 16px;
+    min-width: 140px;
   }
   button.action-btn:disabled {
     background-color: #9bbbd4;
@@ -119,33 +152,38 @@
   #totalBalance {
     position: fixed;
     bottom: 0;
-    left: 0;
+    left: 140px;
     right: 0;
     background-color: #222;
     color: white;
-    font-size: 16px;
+    font-size: 19px;
     font-weight: 700;
-    padding: 12px 8px;
+    padding: 14px 12px;
     text-align: center;
-    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 -2px 14px rgba(0, 0, 0, 0.3);
     user-select:none;
-    z-index: 1000;
+  }
+  @media (max-width: 400px) {
+    #totalBalance {
+      left: 0;
+    }
   }
   .btn-cell {
-    width: 36px;
+    width: 48px;
   }
   .delete-btn {
     background-color: #e74c3c;
-    padding: 4px 8px;
-    border-radius: 5px;
-    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 14px;
   }
   .delete-btn:hover {
     background-color: #c0392b;
   }
   #totalsTableContainer {
     overflow-x: auto;
-    margin: 0 auto 12px;
+    margin: 0 auto 20px;
+    max-width: 90%;
   }
   #totalsTable {
     border-collapse: collapse;
@@ -153,64 +191,39 @@
     min-width: 300px;
     box-shadow: 0 1px 6px rgba(0,0,0,0.1);
     background: white;
-    border-radius: 6px;
+    border-radius: 8px;
     overflow: hidden;
   }
   #totalsTable th, #totalsTable td {
     border: 1px solid #ddd;
-    padding: 8px 6px;
-    min-width: 60px;
-    font-size: 12px;
+    padding: 12px 10px;
+    min-width: 80px;
   }
   #totalsTable th {
     background: #3498db;
     color: white;
-    font-weight: 600;
+    font-weight: 700;
   }
   #totalsTable tr:hover {
     background: #f1f6fc;
-  }
-  /* Responsive tweaks */
-  @media (max-width: 320px) {
-    h1 {
-      font-size: 18px;
-    }
-    .tab {
-      font-size: 12px;
-      padding: 8px 4px;
-    }
-    button.action-btn {
-      font-size: 13px;
-      padding: 8px 14px;
-      min-width: 90px;
-    }
-    input[type="text"], input[type="number"] {
-      width: 85%;
-      padding: 4px 5px;
-      font-size: 13px;
-    }
-    th, td {
-      font-size: 11px;
-      padding: 6px 4px;
-    }
   }
 </style>
 </head>
 <body>
 
-<div class="tabs" role="navigation" aria-label="Main menu">
-  <div class="tab active" id="tabCurrent" onclick="switchTab('current')">Current</div>
-  <div class="tab" id="tabPaidout" onclick="switchTab('paidout')">To be Paid Out</div>
-  <div class="tab" id="tabLog" onclick="switchTab('log')">Log</div>
-  <div class="tab" id="tabDashboard" onclick="switchTab('dashboard')">Dashboard</div>
+<div class="sidebar" role="navigation" aria-label="Main menu">
+  <button id="btnCurrentSession" class="active" aria-current="page" onclick="switchTab('current')">Current Session</button>
+  <button id="btnToBePaid" onclick="switchTab('paidout')">To be Paid Out</button>
+  <button id="btnLog" onclick="switchTab('log')">Log</button>
+  <button id="btnDashboard" onclick="switchTab('dashboard')">Dashboard</button>
 </div>
 
 <div class="main-content">
 
-  <h1>Mobile Friendly Poker Tracker</h1>
+  <h1>Poker Winnings Tracker</h1>
 
-  <section id="current-tab-content" role="region" aria-label="Current Session">
-    <table id="trackerTable" aria-label="Poker Tracker Table">
+  <section id="current-tab-content" role="region" aria-label="Current Session Tab">
+    <table id="trackerTable" border="0" aria-label="Poker Tracker Table">
       <thead>
         <tr>
           <th>Player</th>
@@ -228,7 +241,7 @@
     </div>
   </section>
 
-  <section id="paidout-tab-content" style="display:none;" role="region" aria-label="To be Paid Out">
+  <section id="paidout-tab-content" style="display:none;" role="region" aria-label="To be Paid Out Tab">
     <div id="totalsTableContainer">
       <table id="totalsTable" aria-label="Running Totals">
         <thead>
@@ -239,7 +252,7 @@
         </tbody>
       </table>
     </div>
-    <table id="sessionsPaidOutTable" border="1" aria-label="To Be Paid Out Sessions" style="margin-bottom: 12px;">
+    <table id="sessionsPaidOutTable" border="1" aria-label="To Be Paid Out Sessions">
       <thead>
         <tr><th>Date / Time</th><th>Player</th><th>Result ($)</th></tr>
       </thead>
@@ -250,7 +263,7 @@
     </div>
   </section>
 
-  <section id="log-tab-content" style="display:none;" role="region" aria-label="Log">
+  <section id="log-tab-content" style="display:none;" role="region" aria-label="Log Tab">
     <table id="logTable" border="1" aria-label="Log History">
       <thead>
         <tr><th>Date / Time</th><th>Player</th><th>Result ($)</th></tr>
@@ -259,9 +272,9 @@
     </table>
   </section>
 
-  <section id="dashboard-tab-content" style="display:none;" role="region" aria-label="Dashboard">
-    <h2 style="text-align:center; margin-top: 8px; font-size: 18px;">Dashboard: Total Winnings / Losses</h2>
-    <table id="dashboardTable" border="1" aria-label="Dashboard Totals" style="margin-bottom: 80px; width: 100%; max-width: 440px; margin-left: auto; margin-right: auto;">
+  <section id="dashboard-tab-content" style="display:none;" role="region" aria-label="Dashboard Tab">
+    <h2 style="text-align:center; margin-top: 8px;">Dashboard: Total Winnings / Losses</h2>
+    <table id="dashboardTable" border="1" aria-label="Dashboard Totals" style="margin-bottom: 80px; width: 90%; max-width: 500px; margin-left: auto; margin-right: auto;">
       <thead><tr><th>Player</th><th>Total Winnings ($)</th></tr></thead>
       <tbody></tbody>
     </table>
@@ -281,17 +294,11 @@
   const sessionsPaidOutTableBody = document.querySelector("#sessionsPaidOutTable tbody");
   const logTableBody = document.querySelector("#logTable tbody");
   const dashboardTableBody = document.querySelector("#dashboardTable tbody");
-  const tabs = {
-    current: document.getElementById("current-tab-content"),
-    paidout: document.getElementById("paidout-tab-content"),
-    log: document.getElementById("log-tab-content"),
-    dashboard: document.getElementById("dashboard-tab-content"),
-  };
-  const tabButtons = {
-    current: document.getElementById("tabCurrent"),
-    paidout: document.getElementById("tabPaidout"),
-    log: document.getElementById("tabLog"),
-    dashboard: document.getElementById("tabDashboard"),
+  const sidebarButtons = {
+    current: document.getElementById("btnCurrentSession"),
+    paidout: document.getElementById("btnToBePaid"),
+    log: document.getElementById("btnLog"),
+    dashboard: document.getElementById("btnDashboard")
   };
 
   let sessions = [];
@@ -423,6 +430,7 @@
     loadDefaultPlayers();
     updateTotalsAndSessions();
 
+    // Update Dashboard immediately after new session
     renderDashboard();
 
     switchTab("paidout");
@@ -590,13 +598,20 @@
   }
 
   function switchTab(tab) {
-    Object.keys(tabs).forEach(key => {
-      tabs[key].style.display = (key === tab) ? "" : "none";
-      tabButtons[key].classList.toggle("active", key === tab);
+    const tabs = [
+      "current",
+      "paidout",
+      "log",
+      "dashboard"
+    ];
+    tabs.forEach(t => {
+      const content = document.getElementById(t + "-tab-content");
+      content.style.display = (t === tab) ? "" : "none";
+      sidebarButtons[t].classList.toggle("active", t === tab);
     });
   }
 
-  // Initialize on page load
+  // Initialize
   loadDefaultPlayers();
   calculateRunningTotal();
   checkConfirmEnabled();
